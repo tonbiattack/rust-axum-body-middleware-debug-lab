@@ -62,7 +62,8 @@ async fn audit_json_body(request: Request, next: Next) -> Response {
         bytes.len()
     );
 
-    next.run(Request::from_parts(parts, Body::empty())).await
+    next.run(Request::from_parts(parts, Body::from(bytes)))
+        .await
 }
 
 async fn create_task(
@@ -70,7 +71,10 @@ async fn create_task(
     Json(payload): Json<CreateTask>,
 ) -> (StatusCode, Json<CreatedTask>) {
     let id = state.created_tasks.fetch_add(1, Ordering::SeqCst) + 1;
-    eprintln!("[handler] task_id={id} title={} を作成しました", payload.title);
+    eprintln!(
+        "[handler] task_id={id} title={} を作成しました",
+        payload.title
+    );
 
     (
         StatusCode::CREATED,
